@@ -1,7 +1,5 @@
 import 'package:employeemanagement/provider/employee_provider.dart';
-import 'package:employeemanagement/screens/home_screen.dart';
-import 'package:employeemanagement/screens/search_screen.dart';
-import 'package:employeemanagement/screens/settings_screen.dart';
+import 'package:employeemanagement/screens/update_password_screen.dart';
 import 'package:employeemanagement/service/sharedpreferences/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,660 +12,622 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
-  int selectedIndex = 2; // Profile default
   bool isEdit = false;
 
-TextEditingController fullNameController = TextEditingController();
-TextEditingController phoneController = TextEditingController();
-TextEditingController genderController = TextEditingController();
-TextEditingController dobController = TextEditingController();
-TextEditingController nationalityController = TextEditingController();
-TextEditingController countryController = TextEditingController();
-TextEditingController stateController = TextEditingController();
-TextEditingController cityController = TextEditingController();
-TextEditingController addressController = TextEditingController();
-TextEditingController postalController = TextEditingController();
-TextEditingController secondEmailController = TextEditingController();
-TextEditingController usernameController = TextEditingController();
+  final fullNameController = TextEditingController();
+  final phoneController = TextEditingController();
 
-void onItemTapped(int index) {
-  setState(() {
-    selectedIndex = index;
-  });
-}
+  @override
+  void initState() {
+    super.initState();
 
- @override
-void initState() {
-  super.initState();
+    Future.microtask(() async {
+      final provider = Provider.of<EmployeeProvider>(context, listen: false);
+      String? token = await StorageService.getToken();
 
-  Future.microtask(() async {
-    final provider = Provider.of<EmployeeProvider>(context, listen: false);
+      if (token != null && token.isNotEmpty) {
+        provider.token = token;
+        await provider.fetchProfile(token);
+      }
+    });
+  }
 
-    String? savedToken = await StorageService.getToken();
-
-    print("SAVED TOKEN => $savedToken"); //  debug
-
-    if (savedToken != null && savedToken.isNotEmpty) {
-      provider.token = savedToken;
-      await provider.fetchProfile(savedToken);
-    }
-  });
-}
   @override
   Widget build(BuildContext context) {
-
-    final List<Widget> pages = [
-      HomeScreen(),
-      SearchScreen(),
-      Container(), // empty placeholder instead of ProfileScreen
-      SettingsScreen(),
-    ];
-
     final provider = Provider.of<EmployeeProvider>(context);
 
-    if(provider.isLoading){
-      return Scaffold(
-        body: Center(child: CircularProgressIndicator(),),
+    if (provider.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     final data = provider.profileData ?? {};
-
     String fullName = data['fullName'] ?? "";
-    String email = data['email'] ?? "";
-    String phone = data['phone'] ?? "";
-    String gender = data['gender'] ?? "";
-    String dateOfBirth = data['dateOfBirth'] ?? "";
-    String nationality = data['nationality'] ?? "";
-    String country = data['country'] ?? "";
-    String state = data['state'] ?? "";
-    String city = data['city'] ?? "";
-    String address = data['address'] ?? "";
-    String postalCode= data['postalCode'] ?? "";
-    String password= data['password'] ?? "";
-    String status = data['status'] ?? "";
-    String image = data['profileImage'] ?? "";
-    String secondEmail = data['secondEmail'] ?? "";
-    String username = data['username'] ?? "";
-    String documentType = data['documentType'] ?? "";
-    String documentNumber = data['documentNumber'] ?? "";
-    String documentExpiry = data['documentExpiry'] ?? "";
-    String profileType = data['profileType'] ?? "";
-    String docUrl = data['docUrl'] ?? "";
-    String profileImageBlog = data['profileImageBlog'] ?? "";
-    String document = data['document'] ?? "";
 
-fullNameController.text = fullName;
-phoneController.text = phone;
-genderController.text = gender;
-dobController.text = dateOfBirth;
-nationalityController.text = nationality;
-countryController.text = country;
-stateController.text = state;
-cityController.text = city;
-addressController.text = address;
-postalController.text = postalCode;
-secondEmailController.text = secondEmail;
-usernameController.text = username;
+    String firstLetter =
+        fullName.isNotEmpty ? fullName[0].toUpperCase() : "?";
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Profile"),
+      backgroundColor: const Color(0xFFF7F8FA),
+
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+
+            /// 👤 PROFILE HEADER
+            Column(
+              children: [
+                Stack(
+                  children: [
+
+                    /// AVATAR
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.blue, width: 2),
+                      ),
+                      child: CircleAvatar(
+                        radius: 44,
+                        backgroundColor: Colors.blue.shade50,
+                        child: Text(
+                          firstLetter,
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    /// EDIT BUTTON
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() => isEdit = !isEdit);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isEdit ? Icons.check : Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                Text(
+                  fullName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                const Text(
+                  "Humble Hearts, Inspiring Care",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            /// 🔹 INFO CARDS
+            _iconTile(
+              icon: Icons.person_outline,
+              value: data['fullName'],
+              controller: fullNameController,
+            ),
+
+            _iconTile(
+              icon: Icons.email_outlined,
+              value: data['email'],
+              isEditable: false,
+            ),
+
+            _iconTile(
+              icon: Icons.phone_outlined,
+              value: data['phone'],
+              controller: phoneController,
+            ),
+
+            const SizedBox(height: 10),
+
+            /// 🔐 CHANGE PASSWORD
+            _iconTile(
+              icon: Icons.lock_outline,
+              value: "Change Password",
+              isArrow: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const UpdatePasswordScreen(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 30),
+
+            /// 💾 SAVE BUTTON
+            if (isEdit)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await provider.updateProfile(
+                      fullName: fullNameController.text.trim(),
+                      phone: phoneController.text.trim(),
+                    );
+
+                    setState(() => isEdit = false);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Profile Updated")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Save Changes"),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
+            /// 🚪 SIGN OUT (MODERN RED BOX)
+            GestureDetector(
+              onTap: () {
+                provider.logout(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade100),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "Sign out",
+                  style: TextStyle(
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-
-  bottomNavigationBar: BottomNavigationBar(
-  currentIndex: selectedIndex,
-  onTap: onItemTapped,
-  type: BottomNavigationBarType.fixed,
-
-  selectedItemColor: Colors.blue,
-  unselectedItemColor: Colors.grey,
-
-  
-  items: [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: "Home",
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.search),
-      label: "Search",
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: "Profile",
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.settings),
-      label: "Settings",
-    ),
-  ],
-),
-
-      body: selectedIndex == 2
-      ?SingleChildScrollView(
-        child: Padding(
-          padding:EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: 
-                       image.isNotEmpty ? NetworkImage(image) : null,
-                  child: image.isEmpty
-                  ? Icon(Icons.person, size: 50)
-                  :null,
-                ),
-              ),
-              Text("View and update your account details",
-              textAlign: TextAlign.right,
-              style: TextStyle(color: Colors.grey[700], fontSize: 13,fontWeight: FontWeight.w500)),
-
-              SizedBox(height: 20),
-              
-              Text("Full Name", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: fullNameController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(fullName),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("Email",
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(vertical: 10),
-                padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-                decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(email),
-              ),
-              
-             SizedBox(height: 12),
-
-               Text("Phone", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: phoneController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(phone),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("Gender", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: genderController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(gender),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("Date of Birth", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: dobController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(dateOfBirth),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-              Text("Nationality", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: nationalityController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(nationality),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-              Text("Country", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: countryController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(country),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("State", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: stateController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(state),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-             Text("City", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: cityController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(city),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("Address", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: addressController,
-          maxLines: 2,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(address),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-               Text("Postal Code", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: postalController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(postalCode),
-        ),
-),
-              
-             SizedBox(height: 12),
-
-             Text("Password",
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(vertical: 10),
-                padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-                decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(password),
-              ),
-              
-             SizedBox(height: 12),
-
-              Text("Status",
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-                decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(status),
-              ),
-              
-             SizedBox(height: 12),
-
-              Text("Second Email", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: secondEmailController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(secondEmail.isEmpty ? "Not Available" : secondEmail),
-        ),
-),
-             
-             SizedBox(height: 12),
-
-            Text("Username", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-Container(
-  width: double.infinity,
-  margin: EdgeInsets.symmetric(vertical: 10),
-  padding: EdgeInsets.symmetric(horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.grey.shade200,
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: isEdit
-      ? TextField(
-          controller: usernameController,
-          decoration: InputDecoration(border: InputBorder.none),
-        )
-      : Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Text(username.isEmpty ? "Not Available" : username),
-        ),
-),
-             
-             SizedBox(height: 12),
-
-             Text("Document Type", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(documentType.isEmpty ? "Not Available" : documentType),
-             ),
-             
-             SizedBox(height: 12),
-
-             Text("Document Number", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(documentNumber.isEmpty ? "Not Available" : documentNumber),
-             ),
-             
-             SizedBox(height: 12),
-
-             Text("Document Expiry", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(documentExpiry.isEmpty ? "Not Available" : documentExpiry),
-             ),
-             
-             SizedBox(height: 12),
-
-             Text("Profile Type", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(profileType.isEmpty ? "Not Available" : profileType),
-             ),
-             
-             SizedBox(height: 12),
-
-             Text("Document Url", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(docUrl.isEmpty ? "Not Available" : docUrl),
-             ),
-             
-             SizedBox(height: 12),
-
-             Text("Profile Image Blog ", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(profileImageBlog.isEmpty ? "Not Available" : profileImageBlog),
-             ),
-
-             SizedBox(height: 12),
-
-             Text("Document", 
-              style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-               Container(
-                width: double.infinity,
-               margin: EdgeInsets.symmetric(vertical: 10),
-               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 14),
-               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-               ),
-               child: Text(document.isEmpty ? "Not Available" : document),
-             ),
-
-              SizedBox(height: 20),
-
-//  Buttons Row
-Row(
-  children: [
-    Expanded(
-      child: ElevatedButton(
-        onPressed: () async {
-  final provider = Provider.of<EmployeeProvider>(context, listen: false);
-
-  if (isEdit) {
-    print("SAVE CLICKED"); // debug
-
-    await provider.updateProfile(
-      fullName: fullNameController.text.trim(),
-      phone: phoneController.text.trim(),
-      gender: genderController.text.trim(),
-      dateOfBirth: dobController.text.trim(),
-      nationality: nationalityController.text.trim(),
-      country: countryController.text.trim(),
-      state: stateController.text.trim(),
-      city: cityController.text.trim(),
-      address: addressController.text.trim(),
-      postalCode: postalController.text.trim(),
-      secondEmail: secondEmailController.text.trim(),
-      username: usernameController.text.trim(),
     );
-
-    setState(() {
-      isEdit = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Profile Updated")),
-    );
-  } else {
-    print("EDIT MODE"); // debug
-    setState(() {
-      isEdit = true;
-    });
   }
-},
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          backgroundColor: Colors.blue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+
+  /// 🔹 ICON TILE
+  Widget _iconTile({
+    required IconData icon,
+    String? value,
+    TextEditingController? controller,
+    bool isEditable = true,
+    bool isArrow = false,
+    VoidCallback? onTap,
+  }) {
+    if (controller != null && !isEdit) {
+      controller.text = value ?? "";
+    }
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+            )
+          ],
         ),
-        child: Text(
-  isEdit ? "Save" : "Edit",
-  style: TextStyle(color: Colors.white),
-),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blue, size: 22),
+            const SizedBox(width: 14),
+
+            Expanded(
+              child: isEditable && controller != null && isEdit
+                  ? TextField(
+                      controller: controller,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                    )
+                  : Text(
+                      value ?? "-",
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+            ),
+
+            if (isArrow)
+              const Icon(Icons.arrow_forward_ios, size: 16),
+          ],
+        ),
       ),
-    ),
-
-    SizedBox(width: 10),
-
-    Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          Provider.of<EmployeeProvider>(context, listen: false)
-             .logout(context);
-        },
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: Text(
-          "Logout",
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    ),
-  ],
-),
-
-SizedBox(height: 20),
-
-            ],
-          ),
-        ),
-      )
-      : pages[selectedIndex],
     );
   }
 }
+
+
+// import 'package:employeemanagement/provider/employee_provider.dart';
+// import 'package:employeemanagement/screens/update_password_screen.dart';
+// import 'package:employeemanagement/service/sharedpreferences/storage_service.dart';
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+
+// class ProfileScreen extends StatefulWidget {
+//   const ProfileScreen({super.key});
+
+//   @override
+//   State<ProfileScreen> createState() => _ProfileScreenState();
+// }
+
+// class _ProfileScreenState extends State<ProfileScreen> {
+  
+//   bool isEdit = false;
+
+//   //Controllers
+//   final fullNameController = TextEditingController();
+//   final phoneController = TextEditingController();
+//   //final genderController = TextEditingController();
+//   // final dobController = TextEditingController();
+//   // final nationalityController = TextEditingController();
+//   // final countryController = TextEditingController();
+//   // final stateController = TextEditingController();
+//   // final cityController = TextEditingController();
+//   // final addressController = TextEditingController();
+//   // final postalController = TextEditingController();
+//  // final secondEmailController = TextEditingController();
+//   //final usernameController = TextEditingController();
+
+  
+
+//   @override
+//   void initState(){
+//     super.initState();
+
+//     Future.microtask(() async {
+//       final provider = Provider.of<EmployeeProvider>(context, listen: false);
+
+//       String? savedToken = await StorageService.getToken();
+
+//       if (savedToken != null && savedToken.isNotEmpty) {
+//         provider.token = savedToken;
+//         await provider.fetchProfile(savedToken);
+//       }
+//     });
+//   }
+  
+//  //  REUSABLE EDITABLE FIELD
+// Widget buildProfileField({
+//   required String value,
+//   required TextEditingController controller,
+//   int maxLines = 1,
+// }) {
+//   if (!isEdit) controller.text = value;
+
+//   return Container(
+//     margin: const EdgeInsets.symmetric(vertical: 8),
+//     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+//     decoration: BoxDecoration(
+//       color: Colors.white,
+//       borderRadius: BorderRadius.circular(16),
+//       boxShadow: [
+//         BoxShadow(
+//           color: Colors.black12,
+//           blurRadius: 8,
+//           offset: Offset(0, 4),
+//         )
+//       ],
+//     ),
+//     child: isEdit
+//         ? TextField(
+//             controller: controller,
+//             maxLines: maxLines,
+//             style: TextStyle(fontSize: 16),
+//             decoration: InputDecoration(
+//               border: InputBorder.none,
+//               hintText: "Enter value",
+//             ),
+//           )
+//         : Text(
+//             value.isEmpty ? "Not Available" : value,
+//             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+//           ),
+//   );
+// }
+
+//   //  READ ONLY FIELD
+//   Widget buildReadOnlyField(String label, String value) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+//         Container(
+//           width: double.infinity,
+//           margin: EdgeInsets.symmetric(vertical: 10),
+//           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+//           decoration: BoxDecoration(
+//             color: Colors.grey.shade200,
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//           child: Text(value.isEmpty ? "Not Available" : value),
+//         ),
+//         SizedBox(height: 12),
+//       ],
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final provider = Provider.of<EmployeeProvider>(context);
+
+//     if (provider.isLoading) {
+//       return Scaffold(
+//         body: Center(child: CircularProgressIndicator()),
+//       );
+//     }
+
+//     final data = provider.profileData ?? {};
+
+//     return Scaffold(
+//       appBar: AppBar(title: Text("Profile")),
+
+      
+
+//       //  BODY
+//       body: Container(
+//               color: Color(0xfff5f7fb),
+//               child: SingleChildScrollView(
+//                 padding: EdgeInsets.all(16),
+//                 child: Column(
+//                   children: [
+//                     CircleAvatar(
+//   radius: 55,
+//   backgroundColor: Colors.grey.shade200,
+//   backgroundImage: data['profileImage'] != null
+//       ? NetworkImage(data['profileImage'])
+//       : null,
+//   child: data['profileImage'] == null
+//       ? Icon(Icons.person, size: 50, color: Colors.grey)
+//       : null,
+// ),
+              
+//                     SizedBox(height: 20),
+              
+//                     // ✅ FIELDS
+//                     buildProfileField(
+//                         //label: "Full Name",
+//                         value: data['fullName'] ?? "",
+//                         controller: fullNameController),
+              
+//                     Container(
+//   width: double.infinity,
+//   margin: const EdgeInsets.symmetric(vertical: 8),
+//   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+//   decoration: BoxDecoration(
+//     color: Colors.white,
+//     borderRadius: BorderRadius.circular(16),
+//     boxShadow: [
+//       BoxShadow(
+//         color: Colors.black12,
+//         blurRadius: 8,
+//         offset: Offset(0, 4),
+//       )
+//     ],
+//   ),
+//   child: Text(
+//     data['email'] ?? "Not Available",
+//     style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+//   ),
+// ),
+              
+//                     buildProfileField(
+//                        // label: "Phone",
+//                         value: data['phone'] ?? "",
+//                         controller: phoneController),
+              
+//                     // buildProfileField(
+//                     //     label: "Gender",
+//                     //     value: data['gender'] ?? "",
+//                     //     controller: genderController),
+              
+//                     // buildProfileField(
+//                     //     label: "Date of Birth",
+//                     //     value: data['dateOfBirth'] ?? "",
+//                     //     controller: dobController),
+              
+//                     // buildProfileField(
+//                     //     label: "Nationality",
+//                     //     value: data['nationality'] ?? "",
+//                     //     controller: nationalityController),
+              
+//                     // buildProfileField(
+//                     //     label: "Country",
+//                     //     value: data['country'] ?? "",
+//                     //     controller: countryController),
+              
+//                     // buildProfileField(
+//                     //     label: "State",
+//                     //     value: data['state'] ?? "",
+//                     //     controller: stateController),
+              
+//                     // buildProfileField(
+//                     //     label: "City",
+//                     //     value: data['city'] ?? "",
+//                     //     controller: cityController),
+              
+//                     // buildProfileField(
+//                     //     label: "Address",
+//                     //     value: data['address'] ?? "",
+//                     //     controller: addressController,
+//                     //     maxLines: 2),
+              
+//                     // buildProfileField(
+//                     //     label: "Postal Code",
+//                     //     value: data['postalCode'] ?? "",
+//                     //     controller: postalController),
+              
+//                     // buildProfileField(
+//                     //     label: "Second Email",
+//                     //     value: data['secondEmail'] ?? "",
+//                     //     controller: secondEmailController),
+              
+//                     // buildProfileField(
+//                     //     label: "Username",
+//                     //     value: data['username'] ?? "",
+//                     //     controller: usernameController),
+                    
+//               GestureDetector(
+//   onTap: () {
+//     Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//         builder: (_) => const UpdatePasswordScreen(),
+//       ),
+//     );
+//   },
+//   child: Container(
+//     width: double.infinity,
+//     margin: const EdgeInsets.symmetric(vertical: 8),
+//     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+//     decoration: BoxDecoration(
+//       gradient: LinearGradient(
+//         colors: [Colors.blue.shade50, Colors.blue.shade100],
+//       ),
+//       borderRadius: BorderRadius.circular(16),
+//     ),
+//     child: Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: const [
+//         Text(
+//           "Change Password",
+//           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+//         ),
+//         Icon(Icons.arrow_forward_ios, size: 16),
+//       ],
+//     ),
+//   ),
+// ),
+                   
+//                    // buildReadOnlyField("Status", data['status'] ?? ""),
+              
+//                     SizedBox(height: 20),
+              
+//                     //  BUTTONS
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: ElevatedButton(
+//                             onPressed: () async {
+//                               if (isEdit) {
+//                                 await provider.updateProfile(
+//                                   fullName: fullNameController.text.trim(),
+//                                   phone: phoneController.text.trim(),
+//                                   // gender: genderController.text.trim(),
+//                                   // dateOfBirth: dobController.text.trim(),
+//                                   // nationality:
+//                                   //     nationalityController.text.trim(),
+//                                   // country: countryController.text.trim(),
+//                                   // state: stateController.text.trim(),
+//                                   // city: cityController.text.trim(),
+//                                   // address: addressController.text.trim(),
+//                                   // postalCode: postalController.text.trim(),
+//                                   // secondEmail:
+//                                   //     secondEmailController.text.trim(),
+//                                   // username: usernameController.text.trim(),
+//                                 );
+              
+//                                 setState(() => isEdit = false);
+              
+//                                 ScaffoldMessenger.of(context).showSnackBar(
+//                                   SnackBar(content: Text("Profile Updated")),
+//                                 );
+//                               } else {
+//                                 setState(() => isEdit = true);
+//                               }
+//                             },
+//                              style: ElevatedButton.styleFrom(
+//           padding: EdgeInsets.symmetric(vertical: 14),
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(14),
+//           ),
+//           backgroundColor: Colors.black,
+//         ),
+//         child: Text(
+//           isEdit ? "Save Changes" : "Edit Profile",
+//           style: TextStyle(fontSize: 15),
+//         ),
+//       ),
+//     ),
+//     SizedBox(width: 10),
+//     Expanded(
+//       child: OutlinedButton(
+//         onPressed: () {
+//           Provider.of<EmployeeProvider>(context, listen: false)
+//               .logout(context);
+//         },
+//         style: OutlinedButton.styleFrom(
+//           padding: EdgeInsets.symmetric(vertical: 14),
+//           side: BorderSide(color: Colors.red),
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(14),
+//           ),
+//         ),
+//         child: Text(
+//           "Logout",
+//           style: TextStyle(color: Colors.red),
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
+//                   ],
+//                 ),
+//               ),
+//             )
+//     );
+//   }
+// }
+

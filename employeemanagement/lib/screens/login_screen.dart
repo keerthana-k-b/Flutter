@@ -1,4 +1,5 @@
 import 'package:employeemanagement/provider/employee_provider.dart';
+import 'package:employeemanagement/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -202,7 +203,12 @@ class _LoginScreenState extends State<LoginScreen> {
                      fontWeight: FontWeight.w500
                   ),
                 ),
-                TextButton(onPressed: (){}, 
+                TextButton(onPressed: (){
+                   Navigator.push(
+                     context,
+                       MaterialPageRoute(builder: (context) => SignupScreen()),
+                   );
+                }, 
                 child: Text(
                   "Sign Up",
                   style: TextStyle(

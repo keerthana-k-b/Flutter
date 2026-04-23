@@ -1,5 +1,5 @@
+import 'package:employeemanagement/screens/bottom_navigation_screen.dart';
 import 'package:employeemanagement/screens/login_screen.dart';
-import 'package:employeemanagement/screens/profile_screen.dart';
 import 'package:employeemanagement/service/sharedpreferences/storage_service.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Navigator.pushReplacement(
       context,
       
-      MaterialPageRoute(builder: (context) => ProfileScreen()),
+      MaterialPageRoute(builder: (context) => BottomNavigationScreen()),
     );
   } else {
     Navigator.pushReplacement(
